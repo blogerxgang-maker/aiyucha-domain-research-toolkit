@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: AIYucha Domain Intelligence API
+  version: 0.1.0-draft
+  summary: Proposed public API contract for domain research workflows.
+  description: |
+    DRAFT / NOT LIVE. This OpenAPI document describes a proposed public developer
+    surface for AIYucha. It is intentionally decoupled from AIYucha's internal
+    services and does not imply that these endpoints are currently deployed.
+
+    The public contract keeps observations, inferences and decision-support notes
+    separate, and never exposes internal provider, worker, job, node, cache, cost,
+    credential or diagnostic fields.
+  contact:
+    name: AIYucha
+    url: https://aiyucha.com/
+servers:
+  - url: https://api.aiyucha.com/v1
+    description: Planned production base URL. Not live unless separately announced.
+tags:
+  - name: Network & Blocking
+  - name: ICP & Registration
+  - name: Backlinks
+  - name: Domain History
+  - name: Valuation
+  - name: Baidu SEO
+security:
+  - ApiKeyAuth: []
+paths:
+  /domains/{domain}/network:
+    get:
+      tags: [Network & Blocking]
+      operationId: getDomainNetworkResearch
+      summary: Inspect reachability, blocking and DNS-related signals
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      responses:
+        '200':
+          description: Normalized network research result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /domains/{domain}/icp:
+    get:
+      tags: [ICP & Registration]
+      operationId: getDomainIcpResearch
+      summary: Inspect current or historical ICP-related evidence
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      responses:
+        '200':
+          description: Normalized ICP research result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /domains/{domain}/backlinks:
+    get:
+      tags: [Backlinks]
+      operationId: getDomainBacklinkResearch
+      summary: Inspect backlink, referring-domain and historical link signals
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      responses:
+        '200':
+          description: Normalized backlink research result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /domains/{domain}/history:
+    get:
+      tags: [Domain History]
+      operationId: getDomainHistoryResearch
+      summary: Inspect historical website use, public traces and snapshots
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      responses:
+        '200':
+          description: Normalized domain-history result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /domains/{domain}/valuation:
+    post:
+      tags: [Valuation]
+      operationId: createDomainValuation
+      summary: Produce an evidence-backed domain valuation draft
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                currency:
+                  type: string
+                  enum: [CNY, USD]
+                  default: CNY
+                purpose:
+                  type: string
+                  enum: [purchase, sale, seo, brand, general]
+                  default: general
+      responses:
+        '200':
+          description: Evidence-backed valuation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /domains/{domain}/baidu:
+    get:
+      tags: [Baidu SEO]
+      operationId: getDomainBaiduResearch
+      summary: Inspect Baidu indexing and third-party visibility signals
+      description: |
+        "Baidu weight" is treated as a third-party SEO concept, not an official
+        score published by Baidu.
+      parameters:
+        - $ref: '#/components/parameters/Domain'
+      responses:
+        '200':
+          description: Normalized Baidu SEO research result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Proposed public API key header. Draft only; not currently issued by this repository.
+  parameters:
+    Domain:
+      name: domain
+      in: path
+      required: true
+      description: Registrable domain or hostname to research.
+      schema:
+        type: string
+        minLength: 1
+        example: example.com
+  schemas:
+    ResearchResponse:
+      type: object
+      additionalProperties: false
+      required: [request_id, status, domain, observed_at, observations]
+      properties:
+        request_id:
+          type: string
+          example: req_01HYPOTHETICAL
+        status:
+          type: string
+          enum: [completed, partial, unavailable]
+        domain:
+          type: string
+          example: example.com
+        observed_at:
+          type: string
+          format: date-time
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        inferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Inference'
+        next_steps:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+    Observation:
+      type: object
+      additionalProperties: false
+      required: [kind, status]
+      properties:
+        kind:
+          type: string
+          example: referring_domains
+        status:
+          type: string
+          enum: [observed, not_observed, unavailable]
+        value: {}
+        evidence:
+          type: string
+        observed_at:
+          type: string
+          format: date-time
+    Inference:
+      type: object
+      additionalProperties: false
+      required: [text, confidence]
+      properties:
+        text:
+          type: string
+        confidence:
+          type: string
+          enum: [low, medium, high]
+        based_on:
+          type: array
+          items:
+            type: string
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: invalid_domain
+            message:
+              type: string
+            request_id:
+              type: string
+  responses:
+    BadRequest:
+      description: Invalid domain or request payload
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing or invalid public API key
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Public API quota exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
