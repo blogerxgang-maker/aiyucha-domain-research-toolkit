@@ -1,10 +1,14 @@
-# Proposed AIYucha Public API
+# 爱域查公开 API 契约草案
 
-> **Status: draft / not live.** This document describes a proposed external contract for future developer access. It does not claim that `api.aiyucha.com` or any endpoint below is currently available.
+> **状态：draft / not live（草案 / 尚未上线）**。
+>
+> 本文档定义的是未来可能开放给开发者的外部接口形态，不代表 `api.aiyucha.com` 或下面的路径现在已经可调用。
 
-The goal is to let GitHub, GitBook, Postman and future SDKs share one stable vocabulary before the production website is technically aligned with it.
+这套 API 先解决一个问题：让 GitHub、GitBook、Postman、未来 SDK 使用统一的接口语言。等以后真正开放 API，再让技术实现与这套契约对齐。
 
-## Proposed surface
+它和爱域查当前稳定运行的网站、内部 Growth API 是两回事。
+
+## 拟议接口
 
 ```text
 GET  /v1/domains/{domain}/network
@@ -15,21 +19,33 @@ POST /v1/domains/{domain}/valuation
 GET  /v1/domains/{domain}/baidu
 ```
 
-These six resources map to real user questions rather than internal execution paths. The public API should never expose provider names, worker/node IDs, job IDs, internal costs, cache paths, credentials or raw diagnostics.
+资源按用户真正关心的问题划分，而不是照搬内部任务、provider 或节点结构。
 
-## Authentication
-
-The proposed public contract uses:
+## 拟议鉴权方式
 
 ```http
 X-API-Key: YOUR_PUBLIC_API_KEY
 ```
 
-No public keys are issued by this draft. Authentication, quota tiers and billing remain implementation decisions for a later technical alignment.
+目前不会发放真实 Key。API Key、套餐、额度、计费和限流规则都留到真正上线时决定。
 
-## Response model
+## 为什么不按内部接口直接公开
 
-Every endpoint uses the same top-level model:
+公开 API 应该稳定、容易理解，而且不能把内部工程细节暴露出去。
+
+未来公开返回中不应该出现：
+
+- 上游 provider 名称；
+- worker / node 标识；
+- 内部 job / task / attempt ID；
+- 缓存、代理、网关路径；
+- 内部成本；
+- 内部凭证；
+- 原始异常栈和诊断信息。
+
+## 统一响应模型
+
+建议所有查询类接口都保持相同顶层结构：
 
 ```json
 {
@@ -47,44 +63,52 @@ Every endpoint uses the same top-level model:
   ],
   "inferences": [
     {
-      "text": "The domain has a substantial historical link footprint.",
+      "text": "该域名存在较明显的历史外链资产。",
       "confidence": "high",
       "based_on": ["referring_domains"]
     }
   ],
-  "next_steps": ["Review source quality and historical topic continuity."],
+  "next_steps": ["继续检查来源质量、主题相关性和历史变化。"],
   "warnings": []
 }
 ```
 
-The separation is deliberate:
+这里刻意把几层拆开：
 
-- `observations` = directly obtained facts;
-- `inferences` = interpretations based on those facts;
-- `next_steps` = decision-support actions;
-- `warnings` = data-boundary notes, not generic disclaimers.
+- `observations`：直接取得的事实；
+- `inferences`：基于事实做出的判断；
+- `next_steps`：下一步该查什么；
+- `warnings`：数据边界或证据不足。
 
-## Status semantics
+这样可以避免把“没查到”直接解释成“没有”，也避免把一次超时直接解释成“被墙”。
 
-`completed` means the requested public resource produced usable evidence. `partial` means some evidence is usable but one or more expected signals were unavailable. `unavailable` means the request completed without enough evidence to form a useful result.
+## status 语义
 
-A site being offline is not automatically an API failure. A missing historical snapshot is missing evidence, not proof that no site existed. A large backlink count is not itself a valuation conclusion.
+建议只保留三个主状态：
 
-## Error model
+- `completed`：已经取得足够的可用结果；
+- `partial`：有可用结果，但部分预期信号没取得；
+- `unavailable`：这次没有拿到足以形成有效结果的证据。
 
-Proposed codes include:
+“网站打不开”本身不是 API 错误；“历史快照缺失”也不等于历史上从未建站。
 
-- `invalid_domain`
-- `invalid_request`
-- `unauthorized`
-- `quota_exceeded`
-- `temporarily_unavailable`
-- `unsupported_query`
+## 错误码草案
 
-Errors remain public and stable; internal exception classes must not leak into the response.
+```text
+invalid_domain
+invalid_request
+unauthorized
+quota_exceeded
+temporarily_unavailable
+unsupported_query
+```
 
-## Versioning
+对外错误码应该稳定，内部异常类型不直接暴露。
 
-The contract starts at `/v1`. Backward-compatible additions may extend schemas, while breaking changes require a new major API version.
+## 版本策略
 
-The canonical machine-readable draft is [`openapi/openapi.yaml`](../openapi/openapi.yaml).
+首版从 `/v1` 开始。
+
+兼容性新增可以继续放在 `v1`；如果未来出现明显破坏兼容性的字段或语义变化，再进入新的 major version。
+
+机器可读版本见 [`openapi/openapi.yaml`](../openapi/openapi.yaml)。
