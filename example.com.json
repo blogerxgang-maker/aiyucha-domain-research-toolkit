@@ -1,0 +1,21 @@
+{
+  "domain": "example.com",
+  "observed_at": "2026-09-19T00:00:00Z",
+  "vantage": "local-example",
+  "observations": [
+    {
+      "kind": "http_reachability",
+      "status": "example",
+      "value": {
+        "status": 200
+      },
+      "notes": "Illustrative normalized output only."
+    }
+  ],
+  "inferences": [
+    "A single local success does not establish global or China-specific reachability."
+  ],
+  "next_steps": [
+    "Compare independent vantage points when investigating regional blocking."
+  ]
+}
