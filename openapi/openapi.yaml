@@ -1,42 +1,40 @@
 openapi: 3.1.0
 info:
-  title: AIYucha Domain Intelligence API
+  title: 爱域查域名研究 API
   version: 0.1.0-draft
-  summary: Proposed public API contract for domain research workflows.
+  summary: 面向域名研究场景的拟议公开 API 契约。
   description: |
-    DRAFT / NOT LIVE. This OpenAPI document describes a proposed public developer
-    surface for AIYucha. It is intentionally decoupled from AIYucha's internal
-    services and does not imply that these endpoints are currently deployed.
+    草案 / 尚未上线。本 OpenAPI 文档描述爱域查未来可能提供给外部开发者的公开接口形态。
+    它与爱域查当前内部服务刻意解耦，不代表这些接口现在已经部署。
 
-    The public contract keeps observations, inferences and decision-support notes
-    separate, and never exposes internal provider, worker, job, node, cache, cost,
-    credential or diagnostic fields.
+    公开契约把 observations（事实）、inferences（推断）和 next_steps（下一步）分开，
+    并且不暴露内部 provider、worker、job、node、cache、cost、credential 或诊断字段。
   contact:
     name: AIYucha
     url: https://aiyucha.com/
 servers:
   - url: https://api.aiyucha.com/v1
-    description: Planned production base URL. Not live unless separately announced.
+    description: 规划中的生产 Base URL；除非后续单独宣布，否则视为尚未上线。
 tags:
-  - name: Network & Blocking
-  - name: ICP & Registration
-  - name: Backlinks
-  - name: Domain History
-  - name: Valuation
-  - name: Baidu SEO
+  - name: 网络与拦截
+  - name: 备案与注册
+  - name: 外链与引用域
+  - name: 域名历史
+  - name: 域名估价
+  - name: 百度 SEO
 security:
   - ApiKeyAuth: []
 paths:
   /domains/{domain}/network:
     get:
-      tags: [Network & Blocking]
+      tags: [网络与拦截]
       operationId: getDomainNetworkResearch
-      summary: Inspect reachability, blocking and DNS-related signals
+      summary: 查询域名可达性、拦截和 DNS 相关信号
       parameters:
         - $ref: '#/components/parameters/Domain'
       responses:
         '200':
-          description: Normalized network research result
+          description: 规范化的网络研究结果
           content:
             application/json:
               schema:
@@ -46,14 +44,14 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
   /domains/{domain}/icp:
     get:
-      tags: [ICP & Registration]
+      tags: [备案与注册]
       operationId: getDomainIcpResearch
-      summary: Inspect current or historical ICP-related evidence
+      summary: 查询当前或历史 ICP 备案相关证据
       parameters:
         - $ref: '#/components/parameters/Domain'
       responses:
         '200':
-          description: Normalized ICP research result
+          description: 规范化的备案研究结果
           content:
             application/json:
               schema:
@@ -63,14 +61,14 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
   /domains/{domain}/backlinks:
     get:
-      tags: [Backlinks]
+      tags: [外链与引用域]
       operationId: getDomainBacklinkResearch
-      summary: Inspect backlink, referring-domain and historical link signals
+      summary: 查询外链、引用域和历史外链信号
       parameters:
         - $ref: '#/components/parameters/Domain'
       responses:
         '200':
-          description: Normalized backlink research result
+          description: 规范化的外链研究结果
           content:
             application/json:
               schema:
@@ -80,14 +78,14 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
   /domains/{domain}/history:
     get:
-      tags: [Domain History]
+      tags: [域名历史]
       operationId: getDomainHistoryResearch
-      summary: Inspect historical website use, public traces and snapshots
+      summary: 查询历史建站、公开痕迹和历史快照
       parameters:
         - $ref: '#/components/parameters/Domain'
       responses:
         '200':
-          description: Normalized domain-history result
+          description: 规范化的域名历史结果
           content:
             application/json:
               schema:
@@ -97,9 +95,9 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
   /domains/{domain}/valuation:
     post:
-      tags: [Valuation]
+      tags: [域名估价]
       operationId: createDomainValuation
-      summary: Produce an evidence-backed domain valuation draft
+      summary: 基于证据生成域名估价结果
       parameters:
         - $ref: '#/components/parameters/Domain'
       requestBody:
@@ -120,7 +118,7 @@ paths:
                   default: general
       responses:
         '200':
-          description: Evidence-backed valuation result
+          description: 带依据的域名估价结果
           content:
             application/json:
               schema:
@@ -130,17 +128,16 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
   /domains/{domain}/baidu:
     get:
-      tags: [Baidu SEO]
+      tags: [百度 SEO]
       operationId: getDomainBaiduResearch
-      summary: Inspect Baidu indexing and third-party visibility signals
+      summary: 查询百度收录和第三方 SEO 可见性信号
       description: |
-        "Baidu weight" is treated as a third-party SEO concept, not an official
-        score published by Baidu.
+        “百度权重”按第三方 SEO 概念处理，不视为百度官方发布的分数。
       parameters:
         - $ref: '#/components/parameters/Domain'
       responses:
         '200':
-          description: Normalized Baidu SEO research result
+          description: 规范化的百度 SEO 研究结果
           content:
             application/json:
               schema:
@@ -154,13 +151,13 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-      description: Proposed public API key header. Draft only; not currently issued by this repository.
+      description: 拟议公开 API Key 请求头。当前仅为草案，本仓库不会发放真实 Key。
   parameters:
     Domain:
       name: domain
       in: path
       required: true
-      description: Registrable domain or hostname to research.
+      description: 要查询的注册域名或主机名。
       schema:
         type: string
         minLength: 1
@@ -248,17 +245,17 @@ components:
               type: string
   responses:
     BadRequest:
-      description: Invalid domain or request payload
+      description: 域名或请求参数无效
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     Unauthorized:
-      description: Missing or invalid public API key
+      description: 缺少或使用了无效的公开 API Key
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
     RateLimited:
-      description: Public API quota exceeded
+      description: 超出公开 API 额度或限流
       headers:
         Retry-After:
           schema: { type: integer }
