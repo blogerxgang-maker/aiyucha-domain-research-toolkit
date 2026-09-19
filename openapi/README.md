@@ -1,24 +1,28 @@
-# Proposed AIYucha Public API
+# 爱域查拟议公开 API
 
-> **Status: draft / not live.** This directory defines a proposed external developer contract. It does not claim that the endpoints are currently deployed, and it does not mirror AIYucha's internal Growth API.
+> **状态：draft / not live（草案 / 尚未上线）**。
+>
+> 这里定义的是面向外部开发者的接口契约，不代表这些 endpoint 当前已经部署，也不是爱域查内部 Growth API 的公开版本。
 
-The strategy is deliberately decoupled from the production website: first make the external vocabulary, endpoint shape and response model coherent for GitHub, GitBook, Postman and future SDKs; later, when appropriate, align the implementation behind that contract without forcing changes to the currently stable website.
+当前策略很简单：先把外部接口的资源划分、命名、响应结构和错误语义整理清楚，供 GitHub、GitBook、Postman 和未来 SDK 使用；以后真正准备开放 API 时，再让技术实现与这套契约对齐。
 
-## Draft assets
+这不会要求现在去修改已经稳定运行的爱域查网站。
 
-- [`openapi.yaml`](openapi.yaml) — machine-readable OpenAPI 3.1 draft.
-- [`../docs/public-api-draft.md`](../docs/public-api-draft.md) — design notes and response semantics.
-- [`../examples/curl/README.md`](../examples/curl/README.md) — proposed curl usage examples.
+## 当前草案文件
 
-## Proposed base URL
+- [`openapi.yaml`](openapi.yaml)：OpenAPI 3.1 机器可读草案；
+- [`../docs/public-api-draft.md`](../docs/public-api-draft.md)：接口设计说明；
+- [`../examples/curl/README.md`](../examples/curl/README.md)：拟议 curl 调用方式。
+
+## 拟议 Base URL
 
 ```text
 https://api.aiyucha.com/v1
 ```
 
-This is a **planned namespace only** until AIYucha separately announces a live public API.
+这个地址目前只是规划中的 namespace。除非爱域查后续明确宣布 Public API 上线，否则不要把它当成可调用服务。
 
-## Proposed resources
+## 拟议资源
 
 ```text
 GET  /domains/{domain}/network
@@ -29,20 +33,20 @@ POST /domains/{domain}/valuation
 GET  /domains/{domain}/baidu
 ```
 
-The public surface is intentionally organized around user questions instead of internal execution details.
+这些接口按用户问题划分，不按内部 provider、worker、job 或节点划分。
 
-## Public-contract boundary
+## 对外边界
 
-A future implementation may use any internal architecture, but the external contract should not expose:
+未来无论内部最终怎么实现，公开接口都不应该暴露：
 
-- provider or upstream names;
-- worker/node identifiers;
-- job/task/attempt identifiers;
-- cache/proxy/gateway paths;
-- internal cost information;
-- internal exception classes or diagnostics;
-- Growth credentials or other secrets.
+- provider 或上游名称；
+- worker / node ID；
+- 内部 job / task / attempt ID；
+- 缓存、代理和网关路径；
+- 内部成本；
+- 内部异常类；
+- Growth API 凭证或其他 secret。
 
-Authentication is currently modeled as `X-API-Key`, but key issuance, quotas, billing and actual rate limits remain future implementation decisions.
+鉴权目前暂按 `X-API-Key` 设计，但 Key 发放、额度、套餐、计费和真实限流都留到未来实现阶段确定。
 
-The draft can evolve freely while it is marked `0.1.0-draft`. The `draft / not live` notice should only be removed after the public API has been technically aligned and tested against a real service.
+只要版本仍是 `0.1.0-draft`，这套契约就可以继续调整。只有等真实服务完成技术对齐和回归测试后，才应该删除 `draft / not live` 标记。
