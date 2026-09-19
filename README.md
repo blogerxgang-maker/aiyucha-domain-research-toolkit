@@ -58,9 +58,11 @@ troubleshooting/    Common interpretation mistakes
 openapi/             Public API status and future OpenAPI surface
 ```
 
-## Public API status
+## Proposed public API
 
-AIYucha's internal Growth API is **not** a public developer API and is intentionally not documented here. We will only publish API examples after a separate public-API audit establishes versioning, API keys, quotas, stable error codes, sanitized response schemas, and an OpenAPI contract. See [openapi/README.md](openapi/README.md).
+A **draft external API contract** now lives in [`openapi/openapi.yaml`](openapi/openapi.yaml), with design notes in [`docs/public-api-draft.md`](docs/public-api-draft.md) and proposed curl examples in [`examples/curl/README.md`](examples/curl/README.md).
+
+It is explicitly **draft / not live**: the contract is being shaped first for developer documentation and future Postman/GitBook assets, and can be aligned with AIYucha's production implementation later. It does not expose or document the internal Growth API.
 
 No internal provider, worker, job, cost, credential, or diagnostic fields belong in a public client.
 
